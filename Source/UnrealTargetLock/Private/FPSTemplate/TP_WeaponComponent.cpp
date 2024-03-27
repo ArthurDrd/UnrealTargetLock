@@ -93,6 +93,7 @@ void UTP_WeaponComponent::AttachWeapon(AUnrealTargetLockCharacter* TargetCharact
 		{
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
+			EnhancedInputComponent->BindAction(TargetLockAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::TargetLock);
 		}
 	}
 }
@@ -111,4 +112,9 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			Subsystem->RemoveMappingContext(FireMappingContext);
 		}
 	}
+}
+
+void UTP_WeaponComponent::TargetLock()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("TargetLock"));
 }
