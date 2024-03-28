@@ -73,5 +73,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category="Lock")
 	void TargetLock();
 	
+	UFUNCTION(Server, Reliable, Category="Lock")
+	void Server_TargetLock();
+
+	
 #pragma endregion
 };

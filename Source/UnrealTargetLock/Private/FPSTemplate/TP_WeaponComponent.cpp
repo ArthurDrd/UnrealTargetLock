@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "UnrealTargetLock/UnrealTargetLock.h"
 
 // Sets default values for this component's properties
 UTP_WeaponComponent::UTP_WeaponComponent()
@@ -116,5 +117,13 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UTP_WeaponComponent::TargetLock()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("TargetLock"));
+	if(!GetOwner()->HasAuthority())
+		Server_TargetLock();
+	
+	UE_LOG(LogArthur, Warning, TEXT("TargetLock"));
+}
+
+void UTP_WeaponComponent::Server_TargetLock_Implementation()
+{
+	TargetLock();
 }

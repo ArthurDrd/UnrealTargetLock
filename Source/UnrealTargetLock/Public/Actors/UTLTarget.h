@@ -7,7 +7,14 @@
 #include "GameFramework/Actor.h"
 #include "UTLTarget.generated.h"
 
-class UCapsuleComponent;
+class UCapsuleComponent; // Capsule Component forward declaration
+
+UENUM()
+enum class ETargetState : uint8
+{
+	Default,
+	Targeted
+};
 
 UCLASS()
 class UNREALTARGETLOCK_API AUTLTarget : public AActor
@@ -60,24 +67,24 @@ public:
 public:
 
 	UFUNCTION(BlueprintCallable, Category = Lock)
-	bool IsLocked() const { return bIsLocked; }
+	ETargetState GetState() const { return TargetState; }
 	
 	UFUNCTION(BlueprintCallable, Category = Lock)
-	void SetLocked(bool bLocked);
-
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = Lock)
-	void Server_SetLocked(bool bLocked);
+	void SetState(const ETargetState NewState);
 	
 protected:
 	
-	UPROPERTY(ReplicatedUsing=OnRep_IsLocked,EditDefaultsOnly,BlueprintReadOnly, Category = Lock)
-	bool bIsLocked = false;
+	UPROPERTY(ReplicatedUsing=OnRep_StateChanged,EditDefaultsOnly,BlueprintReadOnly, Category = Lock)
+	ETargetState TargetState = ETargetState::Default;
 
 	UFUNCTION()
-	void OnRep_IsLocked();
+	void OnRep_StateChanged();
 
-	UFUNCTION(Server, NetMulticast, Unreliable)
-	void MulticastOnRep_IsLocked(AActor* IgnoredActor);
+	UFUNCTION(BlueprintNativeEvent, Category = Lock)
+	void PlayFX();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Lock)
+	TMap<ETargetState, TSoftObjectPtr<UMaterialInterface>> MaterialsList;
 	
 #pragma endregion 
 };

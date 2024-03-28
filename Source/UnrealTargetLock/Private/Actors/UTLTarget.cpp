@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameplayTags/UTLGameplayTags.h"
 #include "Net/UnrealNetwork.h"
+#include "UnrealTargetLock/UnrealTargetLock.h"
 
 #pragma region Base Functions
 
@@ -38,7 +39,7 @@ void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ThisClass, bIsLocked);
+	DOREPLIFETIME(ThisClass, TargetState);
 }
 
 #pragma endregion
@@ -49,34 +50,26 @@ void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 /// Target Lock
 //////////////////////////////////////////////////////////////////////////
 
-void AUTLTarget::SetLocked(bool bLocked)
+void AUTLTarget::SetState(const ETargetState NewState)
 {
-	if(!HasAuthority())
-		Server_SetLocked(bLocked);
+	if(!HasAuthority()) return; // Server authoritative
 	
-	bIsLocked = bLocked;
-	OnRep_IsLocked(); // Call OnRep manually for the server
-}
-
-
-void AUTLTarget::Server_SetLocked_Implementation(bool bLocked)
-{
-	SetLocked(bLocked);
-}
-
-void AUTLTarget::OnRep_IsLocked()
-{
-	// Local FX
+	if(NewState == TargetState) return; // Ensure stage is changing
 	
-	MulticastOnRep_IsLocked(this); // FX for all other clients
+	TargetState = NewState;
+	OnRep_StateChanged(); // Call OnRep manually for the server
 }
 
-void AUTLTarget::MulticastOnRep_IsLocked_Implementation(AActor* IgnoredActor)
+void AUTLTarget::OnRep_StateChanged()
 {
-	if (this == IgnoredActor)
-		return;
+	UE_LOG(LogArthur, Warning, TEXT("OnStateChanged"));
+	
+	PlayFX(); // Play FX
+}
 
-	UE_LOG(LogNet, Log, TEXT("MulticastOnRep_IsLocked_Implementation"));
+void AUTLTarget::PlayFX_Implementation()
+{
+	TargetMesh->SetMaterial(0, MaterialsList.Find(TargetState)->Get());
 }
 
 #pragma endregion
