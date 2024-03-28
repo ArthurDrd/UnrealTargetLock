@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "UnrealTargetLockCharacter.generated.h"
 
+class UUTLTargetLockComponent;
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -15,6 +16,9 @@ class UInputMappingContext;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTargetChangePositionSignature, AController*, OwnerController, FVector, TargetLocation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetUnlockedSignature, AController*, OwnerController);
 
 UCLASS(config=Game)
 class AUnrealTargetLockCharacter : public ACharacter
@@ -47,6 +51,8 @@ public:
 protected:
 	virtual void BeginPlay();
 
+	virtual void Tick(float DeltaSeconds) override;
+	
 public:
 		
 	/** Look Input Action */
@@ -82,6 +88,26 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+#pragma region Target Lock
+
+//////////////////////////////////////////////////////////////////////////
+/// Target Lock
+//////////////////////////////////////////////////////////////////////////
+
+public:
+
+	UPROPERTY(BlueprintAssignable, Category=Lock)
+	FOnTargetChangePositionSignature FOnTargetChangePositionDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category=Lock)
+	FOnTargetUnlockedSignature FOnTargetUnlockedDelegate;
 	
+protected:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Lock)
+	UUTLTargetLockComponent* TargetLockComponent;
+	
+#pragma endregion 
 };
 

@@ -95,7 +95,6 @@ void UTP_WeaponComponent::AttachWeapon(AUnrealTargetLockCharacter* TargetCharact
 		{
 			// Fire
 			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::Fire);
-			EnhancedInputComponent->BindAction(TargetLockAction, ETriggerEvent::Triggered, this, &UTP_WeaponComponent::TargetLock);
 		}
 	}
 }
@@ -114,46 +113,4 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			Subsystem->RemoveMappingContext(FireMappingContext);
 		}
 	}
-}
-
-void UTP_WeaponComponent::TargetLock()
-{
-	if(!GetOwner()->HasAuthority())
-	{
-		Server_TargetLock();
-		return;
-	}
-
-	// print authority
-	if (!GetOwner()->HasAuthority())
-	{
-		UE_LOG(LogArthur, Warning, TEXT("Has No Authority"));
-	}
-	else
-	{
-		UE_LOG(LogArthur, Warning, TEXT("Has Authority"));
-	}
-
-	TArray<AActor*> ListOfTargets;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AUTLTarget::StaticClass(),  ListOfTargets );
-
-	for (AActor* Target : ListOfTargets)
-	{
-		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
-		if(TargetActor == nullptr) return;
-
-		if (TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))))
-		{
-			TargetActor->Lock(false);
-		}
-		else
-		{
-			TargetActor->Lock(true);
-		}
-	}
-}
-
-void UTP_WeaponComponent::Server_TargetLock_Implementation()
-{
-	TargetLock();
 }

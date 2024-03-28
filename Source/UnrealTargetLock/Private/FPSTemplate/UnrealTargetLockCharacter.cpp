@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "FPSTemplate/UnrealTargetLockCharacter.h"
-#include "FPSTemplate/UnrealTargetLockProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -9,6 +8,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Actors/UTLTarget.h"
+#include "Components/UTLTargetLockComponent.h"
 #include "Engine/LocalPlayer.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -18,6 +19,9 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AUnrealTargetLockCharacter::AUnrealTargetLockCharacter()
 {
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// Character doesnt have a rifle at start
 	bHasRifle = false;
 	
@@ -39,6 +43,8 @@ AUnrealTargetLockCharacter::AUnrealTargetLockCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// Target Lock Component
+	TargetLockComponent = CreateDefaultSubobject<UUTLTargetLockComponent>(TEXT("TargetLockComponent"));
 }
 
 void AUnrealTargetLockCharacter::BeginPlay()
@@ -57,6 +63,22 @@ void AUnrealTargetLockCharacter::BeginPlay()
 
 }
 
+void AUnrealTargetLockCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	const AActor* CurrentTarget = TargetLockComponent->GetCurrentTarget();
+	
+	if (CurrentTarget != nullptr)
+	{
+		FOnTargetChangePositionDelegate.Broadcast(Controller, CurrentTarget->GetActorLocation());
+	}
+	else
+	{
+		FOnTargetUnlockedDelegate.Broadcast(Controller);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////// Input
 
 void AUnrealTargetLockCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,6 +95,9 @@ void AUnrealTargetLockCharacter::SetupPlayerInputComponent(UInputComponent* Play
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUnrealTargetLockCharacter::Look);
+		
+		if(ensureMsgf(TargetLockComponent->TargetLockAction != nullptr, TEXT("TargetLockAction is nullptr")))
+			EnhancedInputComponent->BindAction(TargetLockComponent->TargetLockAction, ETriggerEvent::Triggered, TargetLockComponent, &UUTLTargetLockComponent::TargetLock);
 	}
 	else
 	{

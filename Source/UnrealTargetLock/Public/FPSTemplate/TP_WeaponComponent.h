@@ -57,24 +57,4 @@ protected:
 private:
 	/** The Character holding this weapon*/
 	AUnrealTargetLockCharacter* Character;
-
-#pragma region Target Lock
-
-//////////////////////////////////////////////////////////////////////////
-/// Target Lock
-//////////////////////////////////////////////////////////////////////////
-
-protected:
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* TargetLockAction;
-	
-	/** Target Lock Input Action */
-	UFUNCTION(BlueprintCallable, Category="Lock")
-	void TargetLock();
-	
-	UFUNCTION(Server, Reliable, Category="Lock")
-	void Server_TargetLock();
-
-#pragma endregion
 };
