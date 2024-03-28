@@ -33,6 +33,8 @@ AUTLTarget::AUTLTarget()
 void AUTLTarget::BeginPlay()
 {
 	Super::BeginPlay();
+
+	checkf(MaterialsList.Num() > 0, TEXT("MaterialsList is empty"));
 }
 
 void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -62,14 +64,12 @@ void AUTLTarget::SetState(const ETargetState NewState)
 
 void AUTLTarget::OnRep_StateChanged()
 {
-	UE_LOG(LogArthur, Warning, TEXT("OnStateChanged"));
-	
 	PlayFX(); // Play FX
 }
 
 void AUTLTarget::PlayFX_Implementation()
 {
-	TargetMesh->SetMaterial(0, MaterialsList.Find(TargetState)->Get());
+	TargetMesh->SetMaterial(0, MaterialsList.Find(TargetState)->LoadSynchronous());
 }
 
 #pragma endregion

@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Actors/UTLTarget.h"
 #include "UnrealTargetLock/UnrealTargetLock.h"
 
 // Sets default values for this component's properties
@@ -121,6 +122,18 @@ void UTP_WeaponComponent::TargetLock()
 		Server_TargetLock();
 	
 	UE_LOG(LogArthur, Warning, TEXT("TargetLock"));
+
+	TArray<AActor*> ListOfTargets;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AUTLTarget::StaticClass(),  ListOfTargets );
+
+	for (AActor* Target : ListOfTargets)
+	{
+		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
+		if(TargetActor)
+		{
+			TargetActor->SetState(ETargetState::Targeted);
+		}
+	}
 }
 
 void UTP_WeaponComponent::Server_TargetLock_Implementation()
