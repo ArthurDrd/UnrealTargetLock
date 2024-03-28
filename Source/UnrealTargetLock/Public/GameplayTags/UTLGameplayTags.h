@@ -7,3 +7,4 @@
 
 // Target Lock
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Target_Lockable);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Target_Locked);

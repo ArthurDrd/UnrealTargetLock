@@ -140,13 +140,15 @@ void UTP_WeaponComponent::TargetLock()
 	for (AActor* Target : ListOfTargets)
 	{
 		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
-		if(TargetActor->GetState() == ETargetState::Default)
+		if(TargetActor == nullptr) return;
+
+		if (TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))))
 		{
-			TargetActor->SetState(ETargetState::Targeted);
+			TargetActor->Lock(false);
 		}
-		else if (TargetActor->GetState() == ETargetState::Targeted)
+		else
 		{
-			TargetActor->SetState(ETargetState::Default);
+			TargetActor->Lock(true);
 		}
 	}
 }

@@ -4,16 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayTagContainer.h"
+
 #include "UTLTarget.generated.h"
 
 class UCapsuleComponent; // Capsule Component forward declaration
-
-UENUM()
-enum class ETargetState : uint8
-{
-	Default,
-	Targeted
-};
 
 UCLASS()
 class UNREALTARGETLOCK_API AUTLTarget : public AActor
@@ -63,24 +58,24 @@ public:
 public:
 
 	UFUNCTION(BlueprintCallable, Category = Lock)
-	ETargetState GetState() const { return TargetState; }
+	FGameplayTagContainer GetTags() const { return ListOfTags; }
 	
 	UFUNCTION(BlueprintCallable, Category = Lock)
-	void SetState(const ETargetState NewState);
+	void Lock(bool bShouldLock);
 	
 protected:
 	
-	UPROPERTY(ReplicatedUsing=OnRep_StateChanged,EditDefaultsOnly,BlueprintReadOnly, Category = Lock)
-	ETargetState TargetState = ETargetState::Default;
+	UPROPERTY(ReplicatedUsing=OnRep_TagChanged, EditDefaultsOnly, BlueprintReadOnly, Category = "Lock|Tags")
+	FGameplayTagContainer ListOfTags;
 
 	UFUNCTION()
-	void OnRep_StateChanged();
+	void OnRep_TagChanged();
 
-	UFUNCTION(BlueprintNativeEvent, Category = Lock)
+	UFUNCTION(BlueprintNativeEvent, Category = "Lock")
 	void PlayFX();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Lock)
-	TMap<ETargetState, TSoftObjectPtr<UMaterialInterface>> MaterialsList;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock|Materials")
+	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MaterialsList;
 	
 #pragma endregion 
 };

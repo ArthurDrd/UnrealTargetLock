@@ -36,7 +36,7 @@ void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ThisClass, TargetState);
+	DOREPLIFETIME(ThisClass, ListOfTags);
 }
 
 #pragma endregion
@@ -47,24 +47,28 @@ void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 /// Target Lock
 //////////////////////////////////////////////////////////////////////////
 
-void AUTLTarget::SetState(const ETargetState NewState)
+
+void AUTLTarget::Lock(bool bShouldLock)
 {
-	if(!HasAuthority()) return; // Server authoritative
-	
-	if(NewState == TargetState) return; // Ensure stage is changing
-	
-	TargetState = NewState;
-	OnRep_StateChanged(); // Call OnRep manually for the server
+	if(bShouldLock)
+		ListOfTags.AddTag(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked")));
+	else
+		ListOfTags.RemoveTag(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked")));
+
+	OnRep_TagChanged(); // Call OnRep manually for the server
 }
 
-void AUTLTarget::OnRep_StateChanged()
+void AUTLTarget::OnRep_TagChanged()
 {
 	PlayFX(); // Play FX
 }
 
 void AUTLTarget::PlayFX_Implementation()
 {
-	TargetMesh->SetMaterial(0, MaterialsList.Find(TargetState)->LoadSynchronous());
+	if(ListOfTags.HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))))
+		TargetMesh->SetMaterial(0, MaterialsList.Find("Locked")->LoadSynchronous());
+	else
+		TargetMesh->SetMaterial(0, MaterialsList.Find("Unlocked")->LoadSynchronous());
 }
 
 #pragma endregion
