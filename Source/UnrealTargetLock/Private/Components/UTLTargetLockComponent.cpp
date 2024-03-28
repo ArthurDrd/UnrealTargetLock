@@ -7,7 +7,6 @@
 #include "Actors/UTLTarget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "UnrealTargetLock/UnrealTargetLock.h"
 
 #pragma region Base Functions
 
@@ -53,16 +52,13 @@ void UUTLTargetLockComponent::TargetLock()
 		return;
 	}
 
-	// print authority
-	if (!GetOwner()->HasAuthority())
+	if (CurrentTarget != nullptr)
 	{
-		UE_LOG(LogArthur, Warning, TEXT("Has No Authority"));
+		CurrentTarget->Lock(false);
+		CurrentTarget = nullptr;
+		return;
 	}
-	else
-	{
-		UE_LOG(LogArthur, Warning, TEXT("Has Authority"));
-	}
-
+	
 	TArray<AActor*> ListOfTargets;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AUTLTarget::StaticClass(),  ListOfTargets );
 
@@ -71,15 +67,11 @@ void UUTLTargetLockComponent::TargetLock()
 		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
 		if(TargetActor == nullptr) return;
 
-		if (TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))))
-		{
-			TargetActor->Lock(false);
-			CurrentTarget = nullptr;
-		}
-		else
+		if (!TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))) && TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Lockable"))))
 		{
 			TargetActor->Lock(true);
 			CurrentTarget = TargetActor;
+			return;
 		}
 	}
 }
