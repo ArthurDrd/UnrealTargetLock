@@ -67,6 +67,8 @@ void AUnrealTargetLockCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	if(!HasAuthority()) return;
+	
 	const AActor* CurrentTarget = TargetLockComponent->GetCurrentTarget();
 	
 	if (CurrentTarget != nullptr)
