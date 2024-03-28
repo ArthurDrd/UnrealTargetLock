@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "UTLTarget.generated.h"
 
@@ -52,9 +51,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	UStaticMeshComponent* TargetMesh;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Tag)
-	FGameplayTagContainer TagsContainer;
 	
 #pragma endregion
 

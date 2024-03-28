@@ -2,11 +2,8 @@
 
 
 #include "Actors/UTLTarget.h"
-
 #include "Components/CapsuleComponent.h"
-#include "GameplayTags/UTLGameplayTags.h"
 #include "Net/UnrealNetwork.h"
-#include "UnrealTargetLock/UnrealTargetLock.h"
 
 #pragma region Base Functions
 
@@ -25,8 +22,6 @@ AUTLTarget::AUTLTarget()
 
 	TargetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetMesh"));
 	TargetMesh->SetupAttachment(TargetCapsule);
-	
-	TagsContainer.AddTag(TAG_Target_Lockable);
 }
 
 // Called when the game starts or when spawned

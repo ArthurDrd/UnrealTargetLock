@@ -119,9 +119,20 @@ void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UTP_WeaponComponent::TargetLock()
 {
 	if(!GetOwner()->HasAuthority())
+	{
 		Server_TargetLock();
-	
-	UE_LOG(LogArthur, Warning, TEXT("TargetLock"));
+		return;
+	}
+
+	// print authority
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogArthur, Warning, TEXT("Has No Authority"));
+	}
+	else
+	{
+		UE_LOG(LogArthur, Warning, TEXT("Has Authority"));
+	}
 
 	TArray<AActor*> ListOfTargets;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AUTLTarget::StaticClass(),  ListOfTargets );
@@ -129,9 +140,13 @@ void UTP_WeaponComponent::TargetLock()
 	for (AActor* Target : ListOfTargets)
 	{
 		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
-		if(TargetActor)
+		if(TargetActor->GetState() == ETargetState::Default)
 		{
 			TargetActor->SetState(ETargetState::Targeted);
+		}
+		else if (TargetActor->GetState() == ETargetState::Targeted)
+		{
+			TargetActor->SetState(ETargetState::Default);
 		}
 	}
 }

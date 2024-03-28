@@ -76,6 +76,5 @@ protected:
 	UFUNCTION(Server, Reliable, Category="Lock")
 	void Server_TargetLock();
 
-	
 #pragma endregion
 };
