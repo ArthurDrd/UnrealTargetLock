@@ -18,7 +18,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTargetChangePositionSignature, AController*, OwnerController, FVector, TargetLocation);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetUnlockedSignature, AController*, OwnerController);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTargetUnlockSignature, AController*, OwnerController);
 
 UCLASS(config=Game)
 class AUnrealTargetLockCharacter : public ACharacter
@@ -101,7 +101,7 @@ public:
 	FOnTargetChangePositionSignature FOnTargetChangePositionDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category=Lock)
-	FOnTargetUnlockedSignature FOnTargetUnlockedDelegate;
+	FOnTargetUnlockSignature FOnTargetUnlockDelegate;
 	
 protected:
 	

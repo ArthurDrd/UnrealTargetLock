@@ -77,7 +77,7 @@ void AUnrealTargetLockCharacter::Tick(float DeltaSeconds)
 	}
 	else
 	{
-		FOnTargetUnlockedDelegate.Broadcast(Controller);
+		FOnTargetUnlockDelegate.Broadcast(Controller);
 	}
 }
 

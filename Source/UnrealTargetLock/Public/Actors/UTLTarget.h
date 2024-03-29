@@ -8,6 +8,7 @@
 
 #include "UTLTarget.generated.h"
 
+class UUTLHealthComponent;
 class UCapsuleComponent; // Capsule Component forward declaration
 
 UCLASS()
@@ -28,9 +29,13 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const override;
 	
 protected:
+	
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
 #pragma endregion
 
 #pragma region Base Properties
@@ -76,6 +81,19 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lock|Materials")
 	TMap<FName, TSoftObjectPtr<UMaterialInterface>> MaterialsList;
+	
+#pragma endregion
+
+#pragma region Health
+
+//////////////////////////////////////////////////////////////////////////
+/// Health
+//////////////////////////////////////////////////////////////////////////
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Lock)
+	UUTLHealthComponent* HealthComponent;
 	
 #pragma endregion 
 };

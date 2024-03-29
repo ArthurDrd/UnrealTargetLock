@@ -3,6 +3,8 @@
 
 #include "Actors/UTLTarget.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/UTLHealthComponent.h"
+#include "FPSTemplate/UnrealTargetLockProjectile.h"
 #include "Net/UnrealNetwork.h"
 
 #pragma region Base Functions
@@ -22,6 +24,8 @@ AUTLTarget::AUTLTarget()
 
 	TargetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetMesh"));
 	TargetMesh->SetupAttachment(TargetCapsule);
+
+	HealthComponent = CreateDefaultSubobject<UUTLHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +34,8 @@ void AUTLTarget::BeginPlay()
 	Super::BeginPlay();
 
 	checkf(MaterialsList.Num() > 0, TEXT("MaterialsList is empty"));
+
+	TargetCapsule->OnComponentHit.AddDynamic(this, &AUTLTarget::OnHit);
 }
 
 void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -37,6 +43,15 @@ void AUTLTarget::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ThisClass, ListOfTags);
+}
+
+void AUTLTarget::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
+{
+	if(AUnrealTargetLockProjectile* Projectile = Cast<AUnrealTargetLockProjectile>(OtherActor))
+	{
+		HealthComponent->TakeDamage(100);
+	}
 }
 
 #pragma endregion
