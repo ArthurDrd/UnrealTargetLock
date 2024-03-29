@@ -18,4 +18,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Target Lock")
 	void SetCrosshairPosition(const FVector2D& ScreenPosition);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Target Lock")
+	void SetDefaultCrosshairPosition();
 };
