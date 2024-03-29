@@ -1,3 +1,5 @@
+
+### UnrealEngine ###
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -24,6 +26,7 @@
 *.la
 *.a
 *.lib
+
 
 # Executables
 *.exe
@@ -72,3 +75,26 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+### UnrealEngine Patch ###
+# Don't ignore icon and splash images for mobile app
+!Build/IOS/Resources/
+Build/IOS/Resources/*
+!Build/IOS/Resources/Graphics/
+Build/IOS/Resources/Graphics/*
+!Build/IOS/Resources/Graphics/*.png
+!Build/Android/res/
+Build/Android/res/*
+!Build/Android/res/*/
+Build/Android/res/*/*
+!Build/Android/res/*/*.png
+# Ignore plugins binaries on deep subfolders
+Plugins/**/Binaries/*
+Plugins/**/Intermediate/*
+Plugins/Developer/RiderLink
+
+# Mac OS
+**/.DS_Store
+.DS_Store
+._*
+**/._*
