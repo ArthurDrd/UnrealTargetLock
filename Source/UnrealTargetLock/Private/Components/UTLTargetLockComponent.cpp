@@ -5,7 +5,10 @@
 
 #include "GameplayTagContainer.h"
 #include "Actors/UTLTarget.h"
+#include "Camera/CameraComponent.h"
+#include "Components/UTLHealthComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 #pragma region Base Functions
@@ -44,6 +47,14 @@ void UUTLTargetLockComponent::BeginPlay()
 /// Target Lock
 //////////////////////////////////////////////////////////////////////////
 
+void UUTLTargetLockComponent::TargetDeath(AActor* DeadActor)
+{
+	if(CurrentTarget == DeadActor)
+	{
+		CurrentTarget = nullptr;
+	}
+}
+
 void UUTLTargetLockComponent::TargetLock()
 {
 	if(!GetOwner()->HasAuthority())
@@ -55,22 +66,65 @@ void UUTLTargetLockComponent::TargetLock()
 	if (CurrentTarget != nullptr)
 	{
 		CurrentTarget->Lock(false);
+		CurrentTarget->GetHealthComponent()->OnDeathDelegate.RemoveDynamic(this, &UUTLTargetLockComponent::TargetDeath);
 		CurrentTarget = nullptr;
 		return;
 	}
-	
-	TArray<AActor*> ListOfTargets;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AUTLTarget::StaticClass(),  ListOfTargets );
 
-	for (AActor* Target : ListOfTargets)
+	// List of actor hit by the raycast
+	TArray<FHitResult> OutHits;
+
+	// Properties of the raycast
+	FVector Start;
+	FVector End;
+	FVector LookForwardVector;
+
+	const auto OwnersComponent = GetOwner()->GetComponentByClass(UCameraComponent::StaticClass());
+	if(OwnersComponent)
 	{
-		AUTLTarget* TargetActor = Cast<AUTLTarget>(Target);
-		if(TargetActor == nullptr) return;
+		const auto* OwnersCameraComponent = Cast<UCameraComponent>(OwnersComponent);
+		Start = OwnersCameraComponent->GetComponentLocation();
+		LookForwardVector = UKismetMathLibrary::GetForwardVector(OwnersCameraComponent->GetComponentRotation());
+	}
+	else
+	{
+		Start = GetOwner()->GetActorLocation();
+		LookForwardVector = UKismetMathLibrary::GetForwardVector(GetOwner()->GetActorRotation());
+	}
 
+	Start += LookForwardVector * LockOffset;
+	
+	End = Start + LookForwardVector * LockForwardDistance;
+
+	FCollisionQueryParams CollisionParameters;
+	CollisionParameters.AddIgnoredActor(GetOwner());
+	const FCollisionShape CollisionShape = FCollisionShape::MakeSphere(LockPrecision);
+
+	#if !UE_BUILD_SHIPPING
+	
+	if(bShouldDebugTrace)
+	{
+		TArray<FHitResult> GarbageOutHits;
+		UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), Start, End, LockPrecision,
+			TArray<TEnumAsByte<EObjectTypeQuery>>{EObjectTypeQuery::ObjectTypeQuery1}, false,
+			TArray<AActor*>{GetOwner()}, EDrawDebugTrace::ForDuration, GarbageOutHits, true,
+			FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+	}
+
+	#endif
+	
+	GetWorld()->SweepMultiByChannel(OutHits,Start,End,FQuat::Identity,LockCollisionChannel,CollisionShape,CollisionParameters);
+	
+	for (const FHitResult& Hit : OutHits)
+	{
+		AUTLTarget* TargetActor = Cast<AUTLTarget>(Hit.GetActor());
+		if(TargetActor == nullptr) return;
+		
 		if (!TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Locked"))) && TargetActor->GetTags().HasTagExact(FGameplayTag::RequestGameplayTag(TEXT("Target.Lockable"))))
 		{
 			TargetActor->Lock(true);
 			CurrentTarget = TargetActor;
+			CurrentTarget->GetHealthComponent()->OnDeathDelegate.AddDynamic(this, &UUTLTargetLockComponent::TargetDeath);
 			return;
 		}
 	}

@@ -90,6 +90,11 @@ protected:
 /// Health
 //////////////////////////////////////////////////////////////////////////
 
+public:
+
+	UFUNCTION(BlueprintCallable, Category = Health)
+	UUTLHealthComponent* GetHealthComponent() const { return HealthComponent; }
+	
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Lock)

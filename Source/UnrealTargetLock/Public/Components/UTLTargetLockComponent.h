@@ -44,9 +44,37 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Lock")
 	AUTLTarget* GetCurrentTarget() const { return CurrentTarget; }
+
+	UFUNCTION()
+	void TargetDeath(AActor* DeadActor);
 	
 	UFUNCTION(BlueprintCallable, Category="Lock")
 	void TargetLock();
+
+protected:
+
+	// Target Lock
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock")
+	int32 LockForwardDistance = 2000;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock")
+	int32 LockPrecision = 300;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock")
+	int32 LockOffset = 250;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock")
+	TEnumAsByte<ECollisionChannel> LockCollisionChannel = ECC_Visibility;
+
+	// Debug
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock|Debug")
+	bool bShouldDebugTrace = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Lock|Debug")
+	int32 DebugTraceDuration = 5;
+	
 	
 private:
 
